@@ -45,5 +45,11 @@
 	<true/>
 	<key>UIApplicationSupportsIndirectInputEvents</key>
 	<true/>
+	<key>NSBluetoothAlwaysUsageDescription</key>
+<string>Bluetooth capabilities are used to connect to BLE devices.</string>
+<key>NSBluetoothPeripheralUsageDescription</key>
+<string>Bluetooth peripheral usage permissions are used to discover and interact with BLE devices.</string>
+<key>NSLocationWhenInUseUsageDescription</key>
+<string>A message that tells people why the app is requesting access to their location information while the app is running in the foreground - needed for bluetooth with ble</string>
 </dict>
 </plist>
