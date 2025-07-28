@@ -1,0 +1,22 @@
+import 'package:equatable/equatable.dart';
+import 'package:flutter_blue_plus/flutter_blue_plus.dart';
+
+abstract class BluetoothEvent extends Equatable {
+  const BluetoothEvent();
+
+  @override
+  List<Object> get props => [];
+}
+
+class ScanStarted extends BluetoothEvent {}
+
+class ScanStopped extends BluetoothEvent {}
+
+class BluetoothStatusChanged extends BluetoothEvent {
+  final BluetoothAdapterState status;
+
+  const BluetoothStatusChanged(this.status);
+
+  @override
+  List<Object> get props => [status];
+}

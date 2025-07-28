@@ -1,22 +1,26 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_blue_plus/flutter_blue_plus.dart';
+import 'package:flutter_blue_plus/flutter_blue_plus.dart' as fb;
+import 'package:bluetooth_detect_01/bluetooth/bluetooth_bloc.dart';
 
 import 'dart:async';
 
 class MyHomePage extends StatefulWidget {
-  const MyHomePage({super.key});
+  final BluetoothBloc bluetoothBloc; //
+  const MyHomePage({super.key, required this.bluetoothBloc});
   @override
   State<MyHomePage> createState() => _MyHomePageState();
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  BluetoothAdapterState _bluetoothAdapterState = BluetoothAdapterState.unknown;
-  late StreamSubscription<BluetoothAdapterState> _adapterStateStateSubscription;
+  fb.BluetoothAdapterState _bluetoothAdapterState =
+      fb.BluetoothAdapterState.unknown;
+  late StreamSubscription<fb.BluetoothAdapterState>
+  _adapterStateStateSubscription;
 
   @override
   void initState() {
     super.initState();
-    _adapterStateStateSubscription = FlutterBluePlus.adapterState.listen((
+    _adapterStateStateSubscription = fb.FlutterBluePlus.adapterState.listen((
       state,
     ) {
       _bluetoothAdapterState = state;
@@ -32,15 +36,15 @@ class _MyHomePageState extends State<MyHomePage> {
     super.dispose();
   }
 
-  String _getBluetoothStatusMessage(BluetoothAdapterState state) {
+  String _getBluetoothStatusMessage(fb.BluetoothAdapterState state) {
     switch (state) {
-      case BluetoothAdapterState.unavailable:
+      case fb.BluetoothAdapterState.unavailable:
         return 'BluetoothAdapterState.unavailable';
-      case BluetoothAdapterState.unauthorized:
+      case fb.BluetoothAdapterState.unauthorized:
         return 'BluetoothAdapterState.unauthorized';
-      case BluetoothAdapterState.off:
+      case fb.BluetoothAdapterState.off:
         return 'BluetoothAdapterState.off';
-      case BluetoothAdapterState.on:
+      case fb.BluetoothAdapterState.on:
         return 'BluetoothAdapterState.on';
       default:
         return 'default';
@@ -60,7 +64,7 @@ class _MyHomePageState extends State<MyHomePage> {
               textAlign: TextAlign.center,
               style: TextStyle(
                 fontSize: 20,
-                color: _bluetoothAdapterState == BluetoothAdapterState.on
+                color: _bluetoothAdapterState == fb.BluetoothAdapterState.on
                     ? Colors.green
                     : Colors.red,
               ),
