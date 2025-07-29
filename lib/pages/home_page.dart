@@ -14,15 +14,12 @@ class MyHomePage extends StatefulWidget {
 class _MyHomePageState extends State<MyHomePage> {
   fb.BluetoothAdapterState _bluetoothAdapterState =
       fb.BluetoothAdapterState.unknown;
-  late StreamSubscription<fb.BluetoothAdapterState>
-  _adapterStateStateSubscription;
+  late StreamSubscription<fb.BluetoothAdapterState> _adapterStateSubscription;
 
   @override
   void initState() {
     super.initState();
-    _adapterStateStateSubscription = fb.FlutterBluePlus.adapterState.listen((
-      state,
-    ) {
+    _adapterStateSubscription = fb.FlutterBluePlus.adapterState.listen((state) {
       _bluetoothAdapterState = state;
       if (mounted) {
         setState(() {});
@@ -32,7 +29,7 @@ class _MyHomePageState extends State<MyHomePage> {
 
   @override
   void dispose() {
-    _adapterStateStateSubscription.cancel();
+    _adapterStateSubscription.cancel();
     super.dispose();
   }
 
