@@ -1,46 +1,46 @@
 import 'package:bluetooth_detect_01/bluetooth/bluetooth_event.dart';
 import 'package:bluetooth_detect_01/bluetooth/bluetooth_state.dart';
+import 'package:bluetooth_detect_01/widgets/device_list_item.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_blue_plus/flutter_blue_plus.dart' as fb;
 import 'package:bluetooth_detect_01/bluetooth/bluetooth_bloc.dart';
 
 import 'dart:async';
 
-class MyHomePage extends StatefulWidget {
-  final BluetoothBloc bluetoothBloc; //
+class MyHomePage extends StatelessWidget {
+  final BluetoothBloc bluetoothBloc;
   const MyHomePage({super.key, required this.bluetoothBloc});
-  @override
-  State<MyHomePage> createState() => _MyHomePageState();
-}
+  // @override
+  // State<MyHomePage> createState() => _MyHomePageState();
 
-class _MyHomePageState extends State<MyHomePage> {
-  // fb.BluetoothAdapterState _bluetoothAdapterState =
-  //     fb.BluetoothAdapterState.unknown;
-  // late StreamSubscription<fb.BluetoothAdapterState> _adapterStateSubscription;
-  late StreamSubscription<BluetoothState> _bluetoothStateSubscription;
+  // class _MyHomePageState extends State<MyHomePage> {
+  //   // fb.BluetoothAdapterState _bluetoothAdapterState =
+  //   //     fb.BluetoothAdapterState.unknown;
+  //   // late StreamSubscription<fb.BluetoothAdapterState> _adapterStateSubscription;
+  //   late StreamSubscription<BluetoothState> _bluetoothStateSubscription;
 
-  @override
-  void initState() {
-    super.initState();
-    widget.bluetoothBloc.add(
-      BluetoothStatusChanged(fb.BluetoothAdapterState.unknown),
-    );
-    _bluetoothStateSubscription = widget.bluetoothBloc.stream.listen((state) {
-      setState(() {});
-    });
-    // _adapterStateSubscription = fb.FlutterBluePlus.adapterState.listen((state) {
-    //   _bluetoothAdapterState = state;
-    //   if (mounted) {
-    //     setState(() {});
-    //   }
-    // });
-  }
+  //   @override
+  //   void initState() {
+  //     super.initState();
+  //     widget.bluetoothBloc.add(
+  //       BluetoothStatusChanged(fb.BluetoothAdapterState.unknown),
+  //     );
+  //     _bluetoothStateSubscription = widget.bluetoothBloc.stream.listen((state) {
+  //       setState(() {});
+  //     });
+  //     // _adapterStateSubscription = fb.FlutterBluePlus.adapterState.listen((state) {
+  //     //   _bluetoothAdapterState = state;
+  //     //   if (mounted) {
+  //     //     setState(() {});
+  //     //   }
+  //     // });
+  //   }
 
-  @override
-  void dispose() {
-    _bluetoothStateSubscription.cancel();
-    super.dispose();
-  }
+  //   @override
+  //   void dispose() {
+  //     _bluetoothStateSubscription.cancel();
+  //     super.dispose();
+  //   }
 
   String _getBluetoothStatusMessage(fb.BluetoothAdapterState state) {
     switch (state) {
@@ -61,11 +61,12 @@ class _MyHomePageState extends State<MyHomePage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        backgroundColor: Colors.yellow,
         title: const Text('Scanner Bluetooth'),
         actions: [
           StreamBuilder<BluetoothState>(
-            initialData: widget.bluetoothBloc.state,
-            stream: widget.bluetoothBloc.stream,
+            initialData: bluetoothBloc.state,
+            stream: bluetoothBloc.stream,
             builder: (context, snapshot) {
               if (snapshot.hasData) {
                 final state = snapshot.data!;
@@ -74,30 +75,36 @@ class _MyHomePageState extends State<MyHomePage> {
                     fb.BluetoothAdapterState.on) {
                   return IconButton(
                     onPressed: null,
-                    icon: const Icon(Icons.bluetooth_disabled),
+                    icon: const Icon(
+                      Icons.bluetooth_disabled,
+                      color: Colors.grey,
+                    ),
                   );
                 }
                 if (state.scanStatus == BluetoothStateStatus.scanning) {
                   return IconButton(
-                    onPressed: () => widget.bluetoothBloc.add(ScanStopped()),
-                    icon: const Icon(Icons.stop),
+                    onPressed: () => bluetoothBloc.add(ScanStopped()),
+                    icon: const Icon(Icons.stop, color: Colors.red),
                   );
                 }
                 if (state.scanStatus == BluetoothStateStatus.stop) {
                   return IconButton(
-                    onPressed: () => widget.bluetoothBloc.add(ScanStarted()),
-                    icon: const Icon(Icons.start),
+                    onPressed: () => bluetoothBloc.add(ScanStarted()),
+                    icon: const Icon(Icons.start, color: Colors.green),
                   );
                 }
               }
-              return const SizedBox.shrink();
+              return IconButton(
+                onPressed: () => bluetoothBloc.add(ScanStarted()),
+                icon: const Icon(Icons.start, color: Colors.green),
+              );
             },
           ),
         ],
       ),
       body: StreamBuilder<BluetoothState>(
-        initialData: widget.bluetoothBloc.state,
-        stream: widget.bluetoothBloc.stream,
+        initialData: bluetoothBloc.state,
+        stream: bluetoothBloc.stream,
         builder: (context, snapshot) {
           if (snapshot.hasData) {
             final state = snapshot.data!;
@@ -114,12 +121,29 @@ class _MyHomePageState extends State<MyHomePage> {
               );
             }
             if (state.scanStatus == BluetoothStateStatus.scanning) {
-              //TODO
-              //si la liste des appareils est vide
-              //sinon
+              return Center(
+                child: Column(
+                  children: [
+                    Text(
+                      _getBluetoothStatusMessage(state.bluetoothAdapterState),
+                    ),
+                    Icon(Icons.circle, color: Colors.grey),
+                  ],
+                ),
+              );
             }
-            //TODO
-            //si pas de scan en cours, afficher qqchose ?
+            if (state.discoveredDevices.isEmpty) {
+              return const Center(child: Text("Aucun device trouvé."));
+            } else {
+              return ListView.builder(
+                itemCount: state.discoveredDevices.length,
+                itemBuilder: (context, index) {
+                  final device = state.discoveredDevices[index];
+                  // On utilise le widget créé à l'étape 1
+                  return DeviceListItem(bluetoothDevice: device);
+                },
+              );
+            }
           }
           return const SizedBox.shrink();
         },
