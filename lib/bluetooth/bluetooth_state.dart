@@ -29,6 +29,8 @@ class BluetoothState extends Equatable {
     return BluetoothState(
       scanStatus: scanStatus ?? this.scanStatus,
       discoveredDevices: discoveredDevices ?? this.discoveredDevices,
+      bluetoothAdapterState:
+          bluetoothAdapterState ?? this.bluetoothAdapterState,
     );
   }
 }

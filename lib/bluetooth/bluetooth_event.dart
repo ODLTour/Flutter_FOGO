@@ -20,3 +20,12 @@ class BluetoothStatusChanged extends BluetoothEvent {
   @override
   List<Object> get props => [status];
 }
+
+class DeviceDiscovered extends BluetoothEvent {
+  final ScanResult deviceScanResult;
+
+  const DeviceDiscovered(this.deviceScanResult);
+
+  @override
+  List<Object> get props => [deviceScanResult];
+}
