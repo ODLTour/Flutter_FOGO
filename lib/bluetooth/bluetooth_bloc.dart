@@ -9,18 +9,14 @@ import 'package:flutter_blue_plus/flutter_blue_plus.dart' as fb;
 
 class BluetoothBloc extends Bloc<BluetoothEvent, BluetoothState> {
   late StreamSubscription<fb.BluetoothAdapterState> _adapterStateSubscription;
-  late final StreamSubscription<List<fb.ScanResult>> _scanResultsSubscription;
+  StreamSubscription<fb.ScanResult>? _scanSubscription;
 
   BluetoothBloc() : super(const BluetoothState()) {
     on<ScanStarted>(handleScanStarted);
     on<ScanStopped>(handleScanStopped);
     on<BluetoothStatusChanged>(handleBluetoothStatusChanged);
     on<DeviceDiscovered>(handleDeviceDiscovered);
-    _scanResultsSubscription = fb.FlutterBluePlus.scanResults.listen((devices) {
-      for (var device in devices) {
-        add(DeviceDiscovered(device));
-      }
-    });
+
     _adapterStateSubscription = fb.FlutterBluePlus.adapterState.listen((
       status,
     ) {
@@ -32,15 +28,38 @@ class BluetoothBloc extends Bloc<BluetoothEvent, BluetoothState> {
     ScanStarted event,
     Emitter<BluetoothState> emit,
   ) async {
-    await fb.FlutterBluePlus.startScan(timeout: const Duration(seconds: 10));
-    emit(
-      state.copyWith(
-        scanStatus: BluetoothStateStatus.scanning,
-        discoveredDevices: [],
-      ),
-    );
-    if (kDebugMode) {
-      debugPrint("Scan Started");
+    try {
+      await fb.FlutterBluePlus.stopScan(); // stoppe scan précédent si actif
+      emit(
+        state.copyWith(
+          scanStatus: BluetoothStateStatus.scanning,
+          discoveredDevices: [],
+        ),
+      );
+
+      // Annule une subscription précédente pour éviter les conflits
+      await _scanSubscription?.cancel();
+
+      // Écoute en mode "legacy" et dispatch des événements individuels
+      _scanSubscription = fb.FlutterBluePlus.scanResults
+          .expand((list) => list)
+          .listen((scanResult) {
+            add(DeviceDiscovered(scanResult));
+          });
+
+      await fb.FlutterBluePlus.startScan(
+        timeout: const Duration(seconds: 15),
+        androidUsesFineLocation: true, // ✅ important !
+      );
+
+      if (kDebugMode) {
+        debugPrint("Scan démarré avec androidUsesFineLocation: true");
+      }
+    } catch (e) {
+      emit(state.copyWith(scanStatus: BluetoothStateStatus.error));
+      if (kDebugMode) {
+        debugPrint('Erreur démarrage scan : $e');
+      }
     }
   }
 
@@ -49,14 +68,17 @@ class BluetoothBloc extends Bloc<BluetoothEvent, BluetoothState> {
     Emitter<BluetoothState> emit,
   ) async {
     await fb.FlutterBluePlus.stopScan();
+    await _scanSubscription?.cancel();
+
     emit(
       state.copyWith(
         scanStatus: BluetoothStateStatus.stop,
-        discoveredDevices: [],
+        discoveredDevices:
+            [], // A commenter si on ne veut pas vider la liste à la fin du scan
       ),
     );
     if (kDebugMode) {
-      debugPrint("Scan Stopped");
+      debugPrint("Scan arrêté");
     }
   }
 
@@ -66,7 +88,7 @@ class BluetoothBloc extends Bloc<BluetoothEvent, BluetoothState> {
   ) async {
     emit(state.copyWith(bluetoothAdapterState: event.status));
     if (kDebugMode) {
-      debugPrint("State changed : ${event.status}");
+      debugPrint("Bluetooth state changé : ${event.status}");
     }
   }
 
@@ -74,37 +96,32 @@ class BluetoothBloc extends Bloc<BluetoothEvent, BluetoothState> {
     DeviceDiscovered event,
     Emitter<BluetoothState> emit,
   ) {
+    final scanResult = event.deviceScanResult;
     final newDevice = BluetoothDevice(
-      id: event.deviceScanResult.device.remoteId.toString(),
-      name: event.deviceScanResult.device.platformName,
-      rssi: event.deviceScanResult.device.readRssi().toString(),
-      scanResult: event.deviceScanResult,
+      id: scanResult.device.remoteId.toString(),
+      name: scanResult.device.platformName,
+      rssi: scanResult.rssi.toString(),
+      scanResult: scanResult,
     );
     final updatedDevices = List<BluetoothDevice>.from(state.discoveredDevices);
-    final index = updatedDevices.indexWhere(
-      (device) => device.id == newDevice.id,
-    );
+    final index = updatedDevices.indexWhere((dev) => dev.id == newDevice.id);
     if (index != -1) {
       updatedDevices[index] = newDevice;
-      if (kDebugMode) {
-        debugPrint("Device $index updated : $newDevice");
-      }
+      debugPrint("App updated: ${newDevice.name} (RSSI ${newDevice.rssi})");
     } else {
       updatedDevices.add(newDevice);
-      if (kDebugMode) {
-        debugPrint("Device added : $newDevice");
-      }
+      debugPrint("App added: ${newDevice.name} (RSSI ${newDevice.rssi})");
     }
     emit(state.copyWith(discoveredDevices: updatedDevices));
   }
 
   @override
   Future<void> close() {
+    _scanSubscription?.cancel();
     _adapterStateSubscription.cancel();
-    _scanResultsSubscription.cancel();
     fb.FlutterBluePlus.stopScan();
     if (kDebugMode) {
-      debugPrint("close");
+      debugPrint("BluetoothBloc fermé");
     }
     return super.close();
   }
