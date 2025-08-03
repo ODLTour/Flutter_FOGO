@@ -8,8 +8,15 @@ class DeviceListItem extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Card(
-      child: Column(
-        children: [Text(bluetoothDevice.name), Text(bluetoothDevice.id)],
+      child: ListTile(
+        leading: Icon(Icons.bluetooth),
+        title: Text(
+          bluetoothDevice.name.isEmpty
+              ? '(Appareil inconnu)'
+              : bluetoothDevice.name,
+        ),
+        titleTextStyle: TextStyle(fontWeight: FontWeight.bold),
+        subtitle: Text(bluetoothDevice.id.isEmpty ? '' : bluetoothDevice.id),
       ),
     );
   }

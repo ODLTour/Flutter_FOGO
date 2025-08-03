@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'pages/home_page.dart';
 import 'package:bloc/bloc.dart';
 import 'package:bluetooth_detect_01/bluetooth/bluetooth_bloc.dart';
@@ -18,7 +19,7 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: 'Scanner Bluetooth BLE',
       theme: ThemeData(primarySwatch: Colors.orange),
-      home: MyHomePage(bluetoothBloc: bluetoothBloc),
+      home: BlocProvider(create: (_) => bluetoothBloc, child: MyHomePage()),
     );
   }
 }

@@ -1,40 +1,16 @@
 import 'dart:async';
 
+import 'package:bluetooth_detect_01/widgets/device_list_item.dart';
 import 'package:flutter/material.dart';
 import 'package:bluetooth_detect_01/bluetooth/bluetooth_bloc.dart';
 import 'package:bluetooth_detect_01/bluetooth/bluetooth_event.dart';
 import 'package:bluetooth_detect_01/bluetooth/bluetooth_state.dart';
 import 'package:flutter_blue_plus/flutter_blue_plus.dart' as fb;
 import 'package:permission_handler/permission_handler.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 
-class MyHomePage extends StatefulWidget {
-  final BluetoothBloc bluetoothBloc;
-  const MyHomePage({super.key, required this.bluetoothBloc});
-
-  @override
-  State<MyHomePage> createState() => _MyHomePageState();
-}
-
-class _MyHomePageState extends State<MyHomePage> {
-  late StreamSubscription<BluetoothState> _bluetoothStateSubscription;
-
-  @override
-  void initState() {
-    super.initState();
-    // Ne lance pas de scan automatique ici
-    widget.bluetoothBloc.add(
-      BluetoothStatusChanged(fb.BluetoothAdapterState.unknown),
-    );
-    _bluetoothStateSubscription = widget.bluetoothBloc.stream.listen((_) {
-      setState(() {}); // Pour forcer rebuild si besoin
-    });
-  }
-
-  @override
-  void dispose() {
-    _bluetoothStateSubscription.cancel();
-    super.dispose();
-  }
+class MyHomePage extends StatelessWidget {
+  const MyHomePage({super.key});
 
   Future<bool> requestBluetoothPermissions() async {
     final statusScan = await Permission.bluetoothScan.request();
@@ -46,12 +22,13 @@ class _MyHomePageState extends State<MyHomePage> {
         statusLocation.isGranted;
   }
 
-  void _startScan() async {
+  void _startScan(BuildContext context) async {
+    final bluetoothBloc = context.read<BluetoothBloc>();
     final granted = await requestBluetoothPermissions();
     if (granted) {
-      widget.bluetoothBloc.add(ScanStarted());
+      bluetoothBloc.add(ScanStarted());
     } else {
-      if (mounted) {
+      if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
             content: Text('Permissions Bluetooth et localisation requises'),
@@ -61,8 +38,9 @@ class _MyHomePageState extends State<MyHomePage> {
     }
   }
 
-  void _stopScan() {
-    widget.bluetoothBloc.add(ScanStopped());
+  void _stopScan(BuildContext context) {
+    final bluetoothBloc = context.read<BluetoothBloc>();
+    bluetoothBloc.add(ScanStopped());
   }
 
   @override
@@ -71,15 +49,8 @@ class _MyHomePageState extends State<MyHomePage> {
       appBar: AppBar(
         title: const Text('Scanner Bluetooth'),
         actions: [
-          StreamBuilder<BluetoothState>(
-            initialData: widget.bluetoothBloc.state,
-            stream: widget.bluetoothBloc.stream,
-            builder: (context, snapshot) {
-              if (!snapshot.hasData) {
-                return const SizedBox.shrink();
-              }
-              final state = snapshot.data!;
-
+          BlocBuilder<BluetoothBloc, BluetoothState>(
+            builder: (context, state) {
               if (state.bluetoothAdapterState != fb.BluetoothAdapterState.on) {
                 return IconButton(
                   onPressed: null,
@@ -89,14 +60,14 @@ class _MyHomePageState extends State<MyHomePage> {
 
               if (state.scanStatus == BluetoothStateStatus.scanning) {
                 return IconButton(
-                  onPressed: _stopScan,
+                  onPressed: () => _stopScan(context),
                   icon: const Icon(Icons.stop),
                   tooltip: 'Arrêter le scan',
                 );
               }
 
               return IconButton(
-                onPressed: _startScan,
+                onPressed: () => _startScan(context),
                 icon: const Icon(Icons.play_arrow),
                 tooltip: 'Démarrer le scan',
               );
@@ -104,15 +75,8 @@ class _MyHomePageState extends State<MyHomePage> {
           ),
         ],
       ),
-      body: StreamBuilder<BluetoothState>(
-        initialData: widget.bluetoothBloc.state,
-        stream: widget.bluetoothBloc.stream,
-        builder: (context, snapshot) {
-          if (!snapshot.hasData) {
-            return const Center(child: CircularProgressIndicator());
-          }
-          final state = snapshot.data!;
-
+      body: BlocBuilder<BluetoothBloc, BluetoothState>(
+        builder: (context, state) {
           if (state.bluetoothAdapterState != fb.BluetoothAdapterState.on) {
             return Center(
               child: Column(
@@ -142,11 +106,7 @@ class _MyHomePageState extends State<MyHomePage> {
             itemCount: devices.length,
             itemBuilder: (context, index) {
               final device = devices[index];
-              return ListTile(
-                leading: const Icon(Icons.bluetooth),
-                title: Text(device.name.isEmpty ? '(Inconnu)' : device.name),
-                subtitle: Text(device.id ?? ''),
-              );
+              return DeviceListItem(bluetoothDevice: device);
             },
           );
         },
