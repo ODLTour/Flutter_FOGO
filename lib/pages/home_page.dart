@@ -8,6 +8,7 @@ import 'package:bluetooth_detect_01/bluetooth/bluetooth_state.dart';
 import 'package:flutter_blue_plus/flutter_blue_plus.dart' as fb;
 import 'package:permission_handler/permission_handler.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 class MyHomePage extends StatelessWidget {
   const MyHomePage({super.key});
@@ -47,29 +48,44 @@ class MyHomePage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Scanner Bluetooth'),
+        title: Text(
+          'SCANNER BLUETOOTH',
+          style: GoogleFonts.koHo(
+            textStyle: TextStyle(
+              color: Colors.white,
+              letterSpacing: .5,
+              fontWeight: FontWeight.w500,
+            ),
+          ),
+        ),
+        backgroundColor: const Color(0xffB1602E),
         actions: [
           BlocBuilder<BluetoothBloc, BluetoothState>(
             builder: (context, state) {
               if (state.bluetoothAdapterState != fb.BluetoothAdapterState.on) {
                 return IconButton(
                   onPressed: null,
-                  icon: const Icon(Icons.bluetooth_disabled),
+                  icon: const Icon(
+                    Icons.bluetooth_disabled_rounded,
+                    color: Colors.white,
+                  ),
                 );
               }
 
               if (state.scanStatus == BluetoothStateStatus.scanning) {
                 return IconButton(
                   onPressed: () => _stopScan(context),
-                  icon: const Icon(Icons.stop),
-                  tooltip: 'Arrêter le scan',
+                  icon: const Icon(Icons.stop_rounded),
+                  color: Colors.white,
+                  //tooltip: 'Arrêter le scan',
                 );
               }
 
               return IconButton(
                 onPressed: () => _startScan(context),
-                icon: const Icon(Icons.play_arrow),
-                tooltip: 'Démarrer le scan',
+                icon: const Icon(Icons.play_arrow_rounded),
+                color: Colors.white,
+                //tooltip: 'Démarrer le scan',
               );
             },
           ),
@@ -82,12 +98,34 @@ class MyHomePage extends StatelessWidget {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Text(_getBluetoothStatusMessage(state.bluetoothAdapterState)),
+                  Text(
+                    _getBluetoothStatusMessage(state.bluetoothAdapterState),
+                    style: GoogleFonts.koHo(
+                      textStyle: TextStyle(
+                        color: const Color(0xff565659),
+                        fontSize: 17,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                  ),
                   const SizedBox(height: 10),
-                  const Icon(
+                  Icon(
                     Icons.bluetooth_disabled,
-                    color: Colors.red,
+                    color: Colors.red[900],
                     size: 60,
+                  ),
+                  Text(
+                    style: GoogleFonts.koHo(
+                      textStyle: TextStyle(
+                        color: const Color(0xff565659),
+                        fontSize: 17,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                    state.bluetoothAdapterState ==
+                            fb.BluetoothAdapterState.unavailable
+                        ? 'Votre téléphone ne peut pas utiliser le bluetooth.'
+                        : "Veuillez activer le bluetooth sur votre téléphone.",
                   ),
                 ],
               ),
@@ -97,8 +135,17 @@ class MyHomePage extends StatelessWidget {
           final devices = state.discoveredDevices;
 
           if (devices.isEmpty) {
-            return const Center(
-              child: Text('Aucun appareil trouvé à proximité'),
+            return Center(
+              child: Text(
+                'Aucun appareil trouvé à proximité.',
+                style: GoogleFonts.koHo(
+                  textStyle: TextStyle(
+                    color: const Color(0xff565659),
+                    fontSize: 17,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+              ),
             );
           }
 
