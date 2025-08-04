@@ -19,7 +19,12 @@ class MyApp extends StatelessWidget {
 
     return MaterialApp(
       title: 'Scanner Bluetooth BLE',
-      theme: ThemeData(primarySwatch: Colors.orange),
+      theme: ThemeData(
+        useMaterial3: true,
+        colorScheme: ColorScheme.fromSeed(
+          seedColor: const Color.fromARGB(255, 54, 51, 50),
+        ),
+      ),
       home: BlocProvider(
         /*create: (_) => bluetoothBloc*/ create: (context) =>
             useMockBloc ? MockBluetoothBloc() : bluetoothBloc,

@@ -117,7 +117,8 @@ class MyHomePage extends StatelessWidget {
                   Text(
                     style: GoogleFonts.koHo(
                       textStyle: TextStyle(
-                        color: const Color(0xff565659),
+                        color: const Color.fromARGB(255, 58, 58, 60),
+
                         fontSize: 17,
                         fontWeight: FontWeight.w500,
                       ),
@@ -140,7 +141,7 @@ class MyHomePage extends StatelessWidget {
                 'Aucun appareil trouvé à proximité.',
                 style: GoogleFonts.koHo(
                   textStyle: TextStyle(
-                    color: const Color(0xff565659),
+                    color: const Color.fromARGB(255, 58, 58, 60),
                     fontSize: 17,
                     fontWeight: FontWeight.w500,
                   ),

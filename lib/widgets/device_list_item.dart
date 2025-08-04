@@ -23,20 +23,55 @@ class _DeviceListItemState extends State<DeviceListItem> {
       context: context,
       builder: (BuildContext dialogContext) {
         return AlertDialog(
-          title: const Text('Renommer l\'appareil'),
-          surfaceTintColor: const Color(0xffE6D799),
+          title: Text(
+            'Renommer l\'appareil',
+            style: GoogleFonts.koHo(
+              textStyle: TextStyle(
+                color: const Color(0xffB1602E),
+                fontSize: 17,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+          ),
           content: TextField(
             controller: textController,
             autofocus: true,
-            decoration: const InputDecoration(hintText: 'Nouveau nom'),
+            decoration: InputDecoration(
+              hintText: 'Nouveau nom',
+              hintStyle: GoogleFonts.koHo(
+                textStyle: TextStyle(
+                  color: const Color(0xff565659),
+                  fontSize: 15,
+                  fontWeight: FontWeight.w300,
+                ),
+              ),
+            ),
           ),
           actions: <Widget>[
             TextButton(
-              child: const Text('Annuler'),
+              child: Text(
+                'Annuler',
+                style: GoogleFonts.koHo(
+                  textStyle: TextStyle(
+                    color: const Color(0xffB1602E),
+                    fontSize: 15,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+              ),
               onPressed: () => Navigator.of(dialogContext).pop(),
             ),
             TextButton(
-              child: const Text('Renommer'),
+              child: Text(
+                'Renommer',
+                style: GoogleFonts.koHo(
+                  textStyle: TextStyle(
+                    color: const Color(0xffB1602E),
+                    fontSize: 15,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+              ),
               onPressed: () {
                 final newName = textController.text;
                 if (newName.isNotEmpty) {
@@ -66,7 +101,6 @@ class _DeviceListItemState extends State<DeviceListItem> {
               side: BorderSide(color: Colors.black, width: 1.5),
               borderRadius: BorderRadius.circular(15),
             ),
-            shadowColor: const Color(0xffE6D799),
             elevation: 3,
             child: ListTile(
               leading: Icon(Icons.bluetooth, color: const Color(0xff565659)),
@@ -76,7 +110,7 @@ class _DeviceListItemState extends State<DeviceListItem> {
                     : widget.bluetoothDevice.name,
                 style: GoogleFonts.koHo(
                   textStyle: TextStyle(
-                    color: const Color(0xff565659),
+                    color: const Color.fromARGB(255, 58, 58, 60),
                     fontSize: 17,
                     fontWeight: FontWeight.w500,
                   ),
@@ -88,7 +122,8 @@ class _DeviceListItemState extends State<DeviceListItem> {
                     : widget.bluetoothDevice.id,
                 style: GoogleFonts.koHo(
                   textStyle: TextStyle(
-                    color: const Color(0xff565659),
+                    color: const Color.fromARGB(255, 58, 58, 60),
+
                     fontSize: 12,
                     fontWeight: FontWeight.w400,
                   ),
@@ -106,13 +141,33 @@ class _DeviceListItemState extends State<DeviceListItem> {
                   }
                 },
                 itemBuilder: (BuildContext context) => <PopupMenuEntry<String>>[
-                  const PopupMenuItem<String>(
+                  PopupMenuItem<String>(
                     value: 'rename',
-                    child: Text('Renommer'),
+                    child: Text(
+                      'Renommer',
+                      style: GoogleFonts.koHo(
+                        textStyle: TextStyle(
+                          color: const Color.fromARGB(255, 58, 58, 60),
+
+                          fontSize: 15,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                    ),
                   ),
-                  const PopupMenuItem<String>(
+                  PopupMenuItem<String>(
                     value: 'delete',
-                    child: Text('Supprimer'),
+                    child: Text(
+                      'Supprimer',
+                      style: GoogleFonts.koHo(
+                        textStyle: TextStyle(
+                          color: const Color.fromARGB(255, 58, 58, 60),
+
+                          fontSize: 15,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                    ),
                   ),
                 ],
                 icon: const Icon(Icons.more_vert),
