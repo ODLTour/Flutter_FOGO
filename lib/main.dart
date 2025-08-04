@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'pages/home_page.dart';
-import 'package:bloc/bloc.dart';
 import 'package:bluetooth_detect_01/bluetooth/bluetooth_bloc.dart';
 import 'package:bluetooth_detect_01/bluetooth/bluetooth_bloc_observer.dart';
+import 'package:bluetooth_detect_01/bluetooth/mock_bluetooth_bloc.dart';
 
+const bool useMockBloc = true;
 void main() {
   Bloc.observer = BluetoothBlocObserver();
   runApp(const MyApp());
@@ -19,7 +20,11 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: 'Scanner Bluetooth BLE',
       theme: ThemeData(primarySwatch: Colors.orange),
-      home: BlocProvider(create: (_) => bluetoothBloc, child: MyHomePage()),
+      home: BlocProvider(
+        /*create: (_) => bluetoothBloc*/ create: (context) =>
+            useMockBloc ? MockBluetoothBloc() : bluetoothBloc,
+        child: MyHomePage(),
+      ),
     );
   }
 }
