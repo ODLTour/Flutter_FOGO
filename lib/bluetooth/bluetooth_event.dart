@@ -29,3 +29,22 @@ class DeviceDiscovered extends BluetoothEvent {
   @override
   List<Object> get props => [deviceScanResult];
 }
+
+class DeviceDeleteRequested extends BluetoothEvent {
+  final String deviceId;
+
+  const DeviceDeleteRequested(this.deviceId);
+
+  @override
+  List<Object> get props => [deviceId];
+}
+
+class DeviceRenameRequested extends BluetoothEvent {
+  final String deviceId;
+  final String newName;
+
+  const DeviceRenameRequested(this.deviceId, this.newName);
+
+  @override
+  List<Object> get props => [deviceId, newName];
+}

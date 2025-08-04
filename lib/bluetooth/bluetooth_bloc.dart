@@ -16,6 +16,8 @@ class BluetoothBloc extends Bloc<BluetoothEvent, BluetoothState> {
     on<ScanStopped>(handleScanStopped);
     on<BluetoothStatusChanged>(handleBluetoothStatusChanged);
     on<DeviceDiscovered>(handleDeviceDiscovered);
+    on<DeviceDeleteRequested>(handleDeviceDeleteRequested);
+    on<DeviceRenameRequested>(handleDeviceRenameRequested);
 
     _adapterStateSubscription = fb.FlutterBluePlus.adapterState.listen((
       status,
@@ -51,15 +53,8 @@ class BluetoothBloc extends Bloc<BluetoothEvent, BluetoothState> {
         timeout: const Duration(seconds: 15),
         androidUsesFineLocation: true, // ✅ important !
       );
-
-      if (kDebugMode) {
-        debugPrint("Scan démarré avec androidUsesFineLocation: true");
-      }
     } catch (e) {
       emit(state.copyWith(scanStatus: BluetoothStateStatus.error));
-      if (kDebugMode) {
-        debugPrint('Erreur démarrage scan : $e');
-      }
     }
   }
 
@@ -77,9 +72,6 @@ class BluetoothBloc extends Bloc<BluetoothEvent, BluetoothState> {
             [], // A commenter si on ne veut pas vider la liste à la fin du scan
       ),
     );
-    if (kDebugMode) {
-      debugPrint("Scan arrêté");
-    }
   }
 
   Future<void> handleBluetoothStatusChanged(
@@ -111,6 +103,36 @@ class BluetoothBloc extends Bloc<BluetoothEvent, BluetoothState> {
     } else {
       updatedDevices.add(newDevice);
       debugPrint("App added: ${newDevice.name} (RSSI ${newDevice.rssi})");
+    }
+    emit(state.copyWith(discoveredDevices: updatedDevices));
+  }
+
+  void handleDeviceDeleteRequested(
+    DeviceDeleteRequested event,
+    Emitter<BluetoothState> emit,
+  ) {
+    final updatedDevices = List<BluetoothDevice>.from(state.discoveredDevices)
+      ..removeWhere((device) => device.id == event.deviceId);
+
+    emit(state.copyWith(discoveredDevices: updatedDevices));
+  }
+
+  void handleDeviceRenameRequested(
+    DeviceRenameRequested event,
+    Emitter<BluetoothState> emit,
+  ) {
+    final updatedDevices = List<BluetoothDevice>.from(state.discoveredDevices);
+    final index = updatedDevices.indexWhere(
+      (device) => device.id == event.deviceId,
+    );
+    if (index != -1) {
+      final oldDevice = updatedDevices[index];
+      updatedDevices[index] = BluetoothDevice(
+        id: oldDevice.id,
+        name: event.newName,
+        rssi: oldDevice.rssi,
+        scanResult: oldDevice.scanResult,
+      );
     }
     emit(state.copyWith(discoveredDevices: updatedDevices));
   }
